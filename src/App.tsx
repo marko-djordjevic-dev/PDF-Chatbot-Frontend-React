@@ -2,7 +2,7 @@ import { Route, BrowserRouter as Router, Routes } from 'react-router-dom'
 import Dashboard from './pages/dashboard/dashboard'
 import Login from './pages/auth/login'
 import Register from './pages/auth/register'
-import AuthRoute from './components/authRoute'
+// import AuthRoute from './components/authRoute'
 import NotFound from './pages/auth/notfound'
 import { ToastProvider } from './components/toast.tsx'
 import { useEffect, useState } from 'react'
@@ -21,7 +21,8 @@ function App() {
       <ToastProvider>
         <Router>
           <Routes>
-            <Route path='/' element={<AuthRoute><Dashboard /></AuthRoute>} />
+            {/* <Route path='/' element={<AuthRoute><Dashboard /></AuthRoute>} /> */}
+            <Route path='/' element={<Dashboard />} />
             <Route path='/login' element={<Login />} />
             <Route path='/register' element={<Register />} />
             <Route path='*' element={<NotFound />} />

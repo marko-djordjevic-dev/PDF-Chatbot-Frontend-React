@@ -8,19 +8,22 @@ import apiClient from '../../utils/apiClient'
 import ChatbotInterface from '../../components/chatbotInterface'
 import ChatbotModel from '../../components/chatbotModel'
 import { RotatingLines } from "react-loader-spinner"
+import { useSelector } from 'react-redux';
 
 const Dashboard = () => {
     const { addToast } = useToast();
-    const [session_id, setSessionId] = useState<string>();
+    const [session_id, setSessionId] = useState<string>();  
     const [bot_id, setBotId] = useState<string>('');
     const [mode, setMode] = useState<number>(0);
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
     const [isDeleting, setIsDeleting] = useState<boolean>(false);
     const [refresh, setRefresh] = useState<boolean>(false);
-
+    const me = useSelector((state: any) => state.AuthReducer.user)
+    console.log(me)
     const onSelectChatbot = (id: string) => {
         apiClient.post(`${import.meta.env.VITE_API_URL}/chatbot/create_session`, {
-            chatbot_id: id
+            chatbot_id: id,
+            user_id: me && Object.entries(me).length !== 0 ? me.id: null
         })
             .then(response => {
                 setMode(0)

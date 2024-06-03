@@ -4,7 +4,7 @@ type UserData = {
     last_name: string,
     email: string,
 }
-export const setUserData = (data: UserData) => ({
+export const setUserData = (data: UserData | {}) => ({
     type: Types.SET_USER_DATA,
     payload: data
 })

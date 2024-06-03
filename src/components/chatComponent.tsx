@@ -18,7 +18,6 @@ interface Messsage {
 
 const ChatComponent: React.FC<Props> = ({ session_id }) => {
     const [content, setContent] = useState<string>("")
-    const { addToast } = useToast()
     const dummy = useRef<HTMLDivElement>(null)
     const [messages, setMessages] = useState<Messsage[]>([])
 
@@ -28,7 +27,7 @@ const ChatComponent: React.FC<Props> = ({ session_id }) => {
 
     const [isAILoading, setIsAILoading] = useState<boolean>(false);
     const [aiLoadingMessage, setAILoadingMessage] = useState<string>("");
-    
+    const {addToast} = useToast();
 
     useEffect(() => {
         apiClient.post(`${import.meta.env.VITE_API_URL}/chatbot/chatbot_setting_session`, {
@@ -46,60 +45,71 @@ const ChatComponent: React.FC<Props> = ({ session_id }) => {
             })
     }, [session_id])
 
-    const addToMessageQueue = async (message: string, remain: string) => {
-
-        if(remain == "") {
-            setMessages(prev => [
-                ...prev, {
-                    message: message,
-                    from: 'ai'
-                }
-            ]);
-            
-            setIsAILoading(false);
-            setAILoadingMessage("");
-
-            return;
-        }
-        setAILoadingMessage(message);
+    const streamPost = async (url: string, payload: any): Promise<void>  => {
+        setAILoadingMessage("");
+        setContent("")
+        const token = localStorage.getItem('token');
+    
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(payload)
+            });
         
-        const randomNum: number = Math.random() * 20 + 5;
-        const randomTime: number = Math.random() * 60 + 20;
-        const transfer_len: number = Math.min(randomNum, remain.length);
-
-        message += remain.slice(0, transfer_len);
-        remain = remain.slice(transfer_len);
-
-        setTimeout(() => {
-            addToMessageQueue(message, remain);
-        }, randomTime)
-
+            const reader = response.body?.getReader();
+            const decoder = new TextDecoder('utf-8');
+            let partial = '';
+        
+            setMessages(prev => [...prev, {
+                message: "",
+                from: 'ai'
+            }]);
+    
+            setIsAILoading(false);
+    
+            while (true) {
+                if (!reader) break;
+                const { done, value } = await reader.read();
+                if (done) {
+                    break;
+                }
+                partial += decoder.decode(value);
+                setMessages(prev => {
+                    let lastMessageFrom = prev[prev.length - 1].from;
+                    let newMessages: Messsage[] = [];
+                    if (lastMessageFrom === 'ai') {
+                        newMessages = [...prev.slice(0, prev.length - 1), { message: partial.trim(), from: 'ai' }]
+                    } else {
+                        newMessages = [...prev, { message: partial.trim(), from: 'ai' }]
+                    }
+                    return newMessages
+                })
+    
+                setAILoadingMessage(partial.trim());
+            }
+        
+            setIsAILoading(false);
+        } catch (error) {
+            setIsAILoading(false);
+            addToast("Something went wrong", 'error')
+        }
     }
 
     const sendMessage = async (content: string) => {
-        setMessages(prev => [
-            ...prev, {
-                message: content,
-                from: 'user'
-            }
-        ]);
-
+        if (isAILoading) return; 
+        setMessages([...messages, {
+            message: content,
+            from: 'user'
+        }]);
+        
         setIsAILoading(true);
 
-        apiClient.post(`${import.meta.env.VITE_API_URL}/chatbot/get_ai_response`, {
-            message: content,
-            session_id: session_id
-        })
-            .then(response => {
-                
-                addToMessageQueue("", response.data?.answer);
-
-            })
-            .catch(errror => {
-                setIsAILoading(false);
-                
-                addToast(errror.response.data.message, 'error')
-            })
+        await streamPost(`${import.meta.env.VITE_API_URL}/chatbot/get_ai_response`, {message: content, session_id})
+        setIsAILoading(false);
         setContent('');
     }
 

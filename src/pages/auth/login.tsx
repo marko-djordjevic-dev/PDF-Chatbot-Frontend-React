@@ -4,12 +4,15 @@ import axios from 'axios';
 import { useToast } from '../../components/toast';
 import apiClient from '../../utils/apiClient';
 import { Circles } from 'react-loader-spinner';
+import { setUserData } from '../../redux/auth/actions';
+import { useDispatch } from 'react-redux';
 
 const Login = () => {
     const navigate = useNavigate()
     const { addToast } = useToast()
     const [loading, setLoading] = useState(false);
-    
+    const dispatch = useDispatch()
+
     const onSubmit = (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         const data: any = e.currentTarget.elements;
@@ -21,6 +24,7 @@ const Login = () => {
             .then(async response => {
                 setLoading(false);
                 const { token } = response.data
+                dispatch(setUserData(response.data.user))
                 localStorage.setItem('token', token)
                 await axios.interceptors.request.use(config => {
                     config.headers['Authorization'] = `Bearer ${token}`

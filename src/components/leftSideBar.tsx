@@ -1,5 +1,5 @@
 import { useDispatch, useSelector } from "react-redux"
-import { useNavigate } from "react-router-dom"
+import { Link } from "react-router-dom"
 import React, { useEffect } from "react"
 import axios from "axios"
 import { loadChatbots } from "../redux/chatbot/actions"
@@ -20,26 +20,31 @@ const Leftsidebar: React.FC<Props> = ({ onSelectChatbot, onChatbotInterface, onC
     const me = useSelector((state: any) => state.AuthReducer.user)
     const chatbots = useSelector((state: any) => state.ChatbotReducer.chatbots)
     const dispatch = useDispatch()
-    const navigate = useNavigate()
     const { addToast } = useToast()
 
     const logout = () => {
         localStorage.removeItem('token')
+        dispatch(setUserData({}))
         axios.interceptors.request.use(config => {
             config.headers['Authorization'] = ""
             return config
         }, error => Promise.reject(error))
-        navigate('/login')
     }
 
+    const isEmpty = (obj: Object) => {
+        return Object.entries(obj).length === 0;
+    }
     const loadInitialData = async () => {
-        apiClient.post(`${import.meta.env.VITE_API_URL}/auth/user_info`)
+        let token = localStorage.getItem('token')
+        if (token) {
+            apiClient.post(`${import.meta.env.VITE_API_URL}/auth/user_info`)
             .then(response => {
                 dispatch(setUserData(response.data))
             })
             .catch(error => {
                 addToast(error.response.data.message, 'error')
             })
+        }
         apiClient.post(`${import.meta.env.VITE_API_URL}/chatbot/chatbot_list`)
             .then(response => {
                 dispatch(loadChatbots(response.data))
@@ -69,14 +74,20 @@ const Leftsidebar: React.FC<Props> = ({ onSelectChatbot, onChatbotInterface, onC
                             <img src={UserImage} />
                         </div>
                     </div>
-                    <p className="text-lg">
-                        {me.first_name} {me.last_name}
-                    </p>
+                    {
+                        me && !isEmpty(me) &&
+                        <p className="text-lg">
+                            {me.first_name} {me.last_name}
+                        </p>
+                    }
                 </div>
-                <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
-                    <li><a>Profile</a></li>
-                    <li onClick={logout}><a>Logout</a></li>
-                </ul>
+                {
+                    me && !isEmpty(me) && 
+                    <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
+                        <li><a>Profile</a></li>
+                        <li onClick={logout}><a>Logout</a></li>
+                    </ul>
+                }
             </div>
             <div className="divider my-1" />
             { me.superuser == 1 && 
@@ -115,6 +126,13 @@ const Leftsidebar: React.FC<Props> = ({ onSelectChatbot, onChatbotInterface, onC
                     )
                 }
             </div>
+            {
+                isEmpty(me) && 
+                <div className="flex flex-col gap-2 mt-auto">
+                    <Link to={"/register"} className="btn btn-neutral">Sign up</Link>
+                    <Link to={"/login"} className="btn btn-neutral">Log in</Link>
+                </div>   
+            }
         </div>
     )
 }
