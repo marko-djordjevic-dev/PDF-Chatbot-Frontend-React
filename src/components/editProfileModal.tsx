@@ -27,7 +27,7 @@ const EditProfileModal: React.FC<Props> = ({open, handleCloseProfileModal}) => {
         setFirstName(me.first_name);
         setLastName(me.last_name);
         setImageSrc(me.img_id ? `${import.meta.env.VITE_API_URL}/chatbot/avatar/${me.img_id}` : UserImage);
-      }, [me]);
+      }, [me, open]);
 
 
     const handleImageChange = (event: ChangeEvent<HTMLInputElement>) => {

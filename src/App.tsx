@@ -19,9 +19,9 @@ function App() {
   return (
     <div data-theme={theme}>
       <ToastProvider>
-        <Router>
+        <Router basename='/test'>
           <Routes>
-            {/* <Route path='/' element={<AuthRoute><Dashboard /></AuthRoute>} /> */}
+            {/* <Route path='/' element={<AuthRoute ><Dashboard /></AuthRoute>} /> */}
             <Route path='/' element={<Dashboard />} />
             <Route path='/login' element={<Login />} />
             <Route path='/register' element={<Register />} />
