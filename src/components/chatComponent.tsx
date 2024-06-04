@@ -8,7 +8,8 @@ import { ThreeDots } from "react-loader-spinner"
 import SendImage from '../assets/send-button.png'
 
 interface Props {
-    session_id: string | undefined
+    session_id: string | undefined,
+    activeBot: any,
 }
 
 interface Messsage {
@@ -24,6 +25,7 @@ const ChatComponent: React.FC<Props> = ({ session_id }) => {
     const [suggested, setSuggested] = useState<string>("")
     const [placeholder, setPlaceholder] = useState<string>("")
     const [imageSrc, setImageSrc] = useState('')
+    const [name, setName] = useState('')
 
     const [isAILoading, setIsAILoading] = useState<boolean>(false);
     const [aiLoadingMessage, setAILoadingMessage] = useState<string>("");
@@ -35,12 +37,15 @@ const ChatComponent: React.FC<Props> = ({ session_id }) => {
         })
             .then((response) => {
                 const data = response.data
-                
+                console.log("data", data)
+                setName(data.name)
                 setSuggested(data.suggested)
                 setMessages([{ from: 'ai', message: data.initial }])
                 setPlaceholder(data.placeholder)
                 if (data.img_id) {
                     setImageSrc(`${import.meta.env.VITE_API_URL}/chatbot/avatar/${data.img_id}`)
+                } else {
+                    setImageSrc("");
                 }
             })
     }, [session_id])
@@ -130,6 +135,24 @@ const ChatComponent: React.FC<Props> = ({ session_id }) => {
 
     return (
         <div className='w-full h-full flex flex-col gap-3'>
+            {
+                name && 
+                <>
+                    <div className="py-6 px-5 flex justify-items-center items-center border-b-2 border-base-content/10">
+                        <div className="chat-image avatar mr-3">
+                            <div className="w-10 rounded-full">
+                                <img
+                                    alt="PDF Chatbot Avatar"
+                                    src={imageSrc ? imageSrc : ChatbotImage} 
+                                />
+
+                            </div>
+                        </div>
+                        <span className=" text-xl">{name}</span>
+                    </div>
+                    {/* <div className="divider my-0" /> */}
+                </>
+            }
             <div className="overflow-auto h-full p-5">
                 {
                     messages.map((message, index) => (

@@ -18,10 +18,12 @@ const Dashboard = () => {
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
     const [isDeleting, setIsDeleting] = useState<boolean>(false);
     const [refresh, setRefresh] = useState<boolean>(false);
+    const [selectedBot, setSelectedBot] = useState<any>(null);
     const me = useSelector((state: any) => state.AuthReducer.user)
-    const onSelectChatbot = (id: string) => {
+    const onSelectChatbot = (botItem: any) => {
+        setSelectedBot({...botItem});
         apiClient.post(`${import.meta.env.VITE_API_URL}/chatbot/create_session`, {
-            chatbot_id: id,
+            chatbot_id: botItem.id,
             user_id: me && Object.entries(me).length !== 0 ? me.id: null
         })
             .then(response => {
@@ -97,10 +99,11 @@ const Dashboard = () => {
                     onChatbotDelete={onChatbotDelete}
                     onChatbotModel={onChatbotModel}
                     refresh={refresh}
+                    activeBot={selectedBot}
                 />
                 {
                     mode == 0 && session_id &&
-                    <ChatComponent session_id={session_id} />
+                    <ChatComponent session_id={session_id} activeBot={selectedBot}/>
                 }
                 {
                     mode == 1 && bot_id &&

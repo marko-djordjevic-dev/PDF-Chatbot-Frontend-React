@@ -1,6 +1,6 @@
 import { useDispatch, useSelector } from "react-redux"
 import { Link } from "react-router-dom"
-import React, { useEffect } from "react"
+import React, { useEffect, useState } from "react"
 import axios from "axios"
 import { loadChatbots } from "../redux/chatbot/actions"
 import { setUserData } from "../redux/auth/actions"
@@ -8,16 +8,22 @@ import apiClient from "../utils/apiClient"
 import AddChatBot from "./addChatbot"
 import { useToast } from "./toast"
 import UserImage from '../assets/icon-user.png'
+import EditProfileModal from "./editProfileModal"
+import ChangePasswordModal from "./changePasswordModal"
 
 interface Props {
-    onSelectChatbot: (id: string) => void,
+    onSelectChatbot: (botItem: object) => void,
     onChatbotInterface: (id: string) => void,
     onChatbotDelete: (id: string) => void,
     onChatbotModel: (id: string) => void,
+    activeBot: any,
     refresh: boolean
 }
-const Leftsidebar: React.FC<Props> = ({ onSelectChatbot, onChatbotInterface, onChatbotDelete, onChatbotModel, refresh }) => {
+const Leftsidebar: React.FC<Props> = ({ onSelectChatbot, onChatbotInterface, onChatbotDelete, onChatbotModel, refresh, activeBot }) => {
     const me = useSelector((state: any) => state.AuthReducer.user)
+    const [showProfileModal, setShowProfileModal] = useState<boolean>(false);
+    const [showPasswordModal, setShowPasswordModal] = useState<boolean>(false);
+    
     const chatbots = useSelector((state: any) => state.ChatbotReducer.chatbots)
     const dispatch = useDispatch()
     const { addToast } = useToast()
@@ -69,14 +75,14 @@ const Leftsidebar: React.FC<Props> = ({ onSelectChatbot, onChatbotInterface, onC
             {
                 me && !isEmpty(me) && 
                 <>
-                    <div className="dropdown dropdown-right ">
+                    <div className="dropdown dropdown-bottom">
                         <div tabIndex={0}
                             role="button"
                             className="flex items-center gap-2 justify-start h-16 btn rounded-xl btn-base-300 shadow-none"
                         >
                             <div className="avatar">
                                 <div className="w-10 rounded-full">
-                                    <img src={UserImage} />
+                                    <img src={me.img_id ? `${import.meta.env.VITE_API_URL}/chatbot/avatar/${me.img_id}` : UserImage} />
                                 </div>
                             </div>
                             <p className="text-lg">
@@ -84,8 +90,8 @@ const Leftsidebar: React.FC<Props> = ({ onSelectChatbot, onChatbotInterface, onC
                             </p>
                         </div>
                         <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
-                            <li><a>Profile</a></li>
-                            <li><a>Change Password</a></li>
+                            <li onClick={() => setShowProfileModal(true)}><a>Profile</a></li>
+                            <li onClick={() => setShowPasswordModal(true)}><a>Change Password</a></li>
                             <li onClick={logout}><a>Logout</a></li>
                         </ul>
                     </div>
@@ -103,8 +109,12 @@ const Leftsidebar: React.FC<Props> = ({ onSelectChatbot, onChatbotInterface, onC
                             className="flex flex-row gap-1"
                             key={index}>
                             <button
-                                className="btn btn-outline flex-1"
-                                onClick={() => onSelectChatbot(bot.id)}>
+                                className={[
+                                    "btn btn-outline flex-1",
+                                    activeBot && activeBot.id === bot.id ? "btn-active" : ""
+                                ].join(' ')}
+                                onClick={() => onSelectChatbot(bot)}
+                            >
                                 {bot.name}
                             </button>
                             { me.superuser == 1 && 
@@ -135,6 +145,20 @@ const Leftsidebar: React.FC<Props> = ({ onSelectChatbot, onChatbotInterface, onC
                     <Link to={"/register"} className="btn btn-neutral">Sign up</Link>
                     <Link to={"/login"} className="btn btn-neutral">Log in</Link>
                 </div>   
+            }
+             { 
+                me && !isEmpty(me) && 
+                <EditProfileModal 
+                    open={showProfileModal}
+                    handleCloseProfileModal={() => setShowProfileModal(false)}
+                />
+            }
+            { 
+                me && !isEmpty(me) && 
+                <ChangePasswordModal 
+                    open={showPasswordModal}
+                    handleClosePasswordModal={() => setShowPasswordModal(false)}
+                />
             }
         </div>
     )
