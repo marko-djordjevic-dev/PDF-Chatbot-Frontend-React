@@ -32,9 +32,11 @@ const ChangePasswordModal: React.FC<Props> = ({ open, handleClosePasswordModal }
                 () => {
                     addToast("Password updated successfully", 'success')
                     handleClosePasswordModal();
+                    setIsSubmitting(false);
                     reset()
                 }).catch(error => {
                     addToast(error.response.data.message, 'error')
+                    setIsSubmitting(false);
                 }).finally(() => {
                     setIsSubmitting(false);
                 })

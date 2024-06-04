@@ -64,16 +64,19 @@ const EditProfileModal: React.FC<Props> = ({open, handleCloseProfileModal}) => {
                   }
               }).then((res) => {
                 dispatch(setUserData(res.data))
-                  addToast("Profile updated successfully", 'success')
+                addToast("Profile updated successfully", 'success')
+                handleCloseProfileModal();
+                setIsSubmitting(false);
               }).catch(error => {
-                  addToast(error.response.data.message, 'error')
+                addToast(error.response.data.message, 'error')
+                setIsSubmitting(false);
               }).finally(() => {
-                  setIsSubmitting(false);
+                setIsSubmitting(false);
               })
 
-          handleCloseProfileModal();
         } catch (error) {
           addToast('Error updating profile', 'error');
+          setIsSubmitting(false);
         }
       };
 
