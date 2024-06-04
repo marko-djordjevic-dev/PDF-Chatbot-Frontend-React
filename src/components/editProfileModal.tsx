@@ -47,7 +47,7 @@ const EditProfileModal: React.FC<Props> = ({open, handleCloseProfileModal}) => {
 
     const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-      
+        if (isSubmitting) return
         try {
           const formData = new FormData();
           formData.append('first_name', firstName);

@@ -25,7 +25,7 @@ const ChangePasswordModal: React.FC<Props> = ({ open, handleClosePasswordModal }
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
     const onSubmit = async (data: FormData) => {
-
+        if (isSubmitting) return;
         try {
             setIsSubmitting(true);
             apiClient.post(`${import.meta.env.VITE_API_URL}/auth/update_password`, data).then(
