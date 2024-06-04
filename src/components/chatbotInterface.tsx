@@ -89,6 +89,7 @@ const ChatbotInterface: React.FC<{ bot_id: string }> = ({ bot_id }) => {
                         onChange={(e) => setInitial(e.target.value)}
                         className="textarea textarea-bordered" />
                     <label className="">Message Placeholder</label>
+                    
                     <input
                         value={placeholder}
                         type="text"

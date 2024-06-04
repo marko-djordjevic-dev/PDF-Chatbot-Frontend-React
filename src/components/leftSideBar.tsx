@@ -41,8 +41,10 @@ const Leftsidebar: React.FC<Props> = ({ onSelectChatbot, onChatbotInterface, onC
             .then(response => {
                 dispatch(setUserData(response.data))
             })
-            .catch(error => {
-                addToast(error.response.data.message, 'error')
+            .catch(() => {
+                dispatch(setUserData({}));
+                localStorage.removeItem("token")
+                // addToast(error.response.data.message, 'error')
             })
         }
         apiClient.post(`${import.meta.env.VITE_API_URL}/chatbot/chatbot_list`)
@@ -64,33 +66,34 @@ const Leftsidebar: React.FC<Props> = ({ onSelectChatbot, onChatbotInterface, onC
 
     return (
         <div className="flex flex-col w-[350px] bg-base-200 p-3 h-full">
-            <div className="dropdown dropdown-right ">
-                <div tabIndex={0}
-                    role="button"
-                    className="flex items-center gap-2 justify-start h-16 btn rounded-xl btn-base-300 shadow-none"
-                >
-                    <div className="avatar">
-                        <div className="w-10 rounded-full">
-                            <img src={UserImage} />
+            {
+                me && !isEmpty(me) && 
+                <>
+                    <div className="dropdown dropdown-right ">
+                        <div tabIndex={0}
+                            role="button"
+                            className="flex items-center gap-2 justify-start h-16 btn rounded-xl btn-base-300 shadow-none"
+                        >
+                            <div className="avatar">
+                                <div className="w-10 rounded-full">
+                                    <img src={UserImage} />
+                                </div>
+                            </div>
+                            <p className="text-lg">
+                                {me.first_name} {me.last_name}
+                            </p>
                         </div>
+                        <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
+                            <li><a>Profile</a></li>
+                            <li><a>Change Password</a></li>
+                            <li onClick={logout}><a>Logout</a></li>
+                        </ul>
                     </div>
-                    {
-                        me && !isEmpty(me) &&
-                        <p className="text-lg">
-                            {me.first_name} {me.last_name}
-                        </p>
-                    }
-                </div>
-                {
-                    me && !isEmpty(me) && 
-                    <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
-                        <li><a>Profile</a></li>
-                        <li onClick={logout}><a>Logout</a></li>
-                    </ul>
-                }
-            </div>
-            <div className="divider my-1" />
-            { me.superuser == 1 && 
+                    <div className="divider my-1" />
+                </>
+            }
+            { 
+                me && me.superuser == 1 && 
                 <AddChatBot />
             }
             <div className="flex flex-col mt-3 gap-2">

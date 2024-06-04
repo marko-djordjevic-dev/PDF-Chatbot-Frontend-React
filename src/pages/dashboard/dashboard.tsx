@@ -19,7 +19,6 @@ const Dashboard = () => {
     const [isDeleting, setIsDeleting] = useState<boolean>(false);
     const [refresh, setRefresh] = useState<boolean>(false);
     const me = useSelector((state: any) => state.AuthReducer.user)
-    console.log(me)
     const onSelectChatbot = (id: string) => {
         apiClient.post(`${import.meta.env.VITE_API_URL}/chatbot/create_session`, {
             chatbot_id: id,
