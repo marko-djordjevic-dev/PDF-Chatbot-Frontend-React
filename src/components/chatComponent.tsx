@@ -37,7 +37,6 @@ const ChatComponent: React.FC<Props> = ({ session_id }) => {
         })
             .then((response) => {
                 const data = response.data
-                console.log("data", data)
                 setName(data.name)
                 setSuggested(data.suggested)
                 setMessages([{ from: 'ai', message: data.initial }])
@@ -134,7 +133,7 @@ const ChatComponent: React.FC<Props> = ({ session_id }) => {
     }, [session_id])
 
     return (
-        <div className='w-full h-full flex flex-col gap-3'>
+        <div className='flex-1 h-full flex flex-col gap-3'>
             {
                 name && 
                 <>

@@ -1,15 +1,12 @@
 import { useDispatch, useSelector } from "react-redux"
 import { Link } from "react-router-dom"
-import React, { useEffect, useState } from "react"
-import axios from "axios"
+import React, { useEffect } from "react"
 import { loadChatbots } from "../redux/chatbot/actions"
 import { setUserData } from "../redux/auth/actions"
 import apiClient from "../utils/apiClient"
 import AddChatBot from "./addChatbot"
 import { useToast } from "./toast"
-import UserImage from '../assets/icon-user.png'
-import EditProfileModal from "./editProfileModal"
-import ChangePasswordModal from "./changePasswordModal"
+import LogoImage from '../assets/nightingale2.png'
 
 interface Props {
     onSelectChatbot: (botItem: object) => void,
@@ -21,21 +18,10 @@ interface Props {
 }
 const Leftsidebar: React.FC<Props> = ({ onSelectChatbot, onChatbotInterface, onChatbotDelete, onChatbotModel, refresh, activeBot }) => {
     const me = useSelector((state: any) => state.AuthReducer.user)
-    const [showProfileModal, setShowProfileModal] = useState<boolean>(false);
-    const [showPasswordModal, setShowPasswordModal] = useState<boolean>(false);
     
     const chatbots = useSelector((state: any) => state.ChatbotReducer.chatbots)
     const dispatch = useDispatch()
     const { addToast } = useToast()
-
-    const logout = () => {
-        localStorage.removeItem('token')
-        dispatch(setUserData({}))
-        axios.interceptors.request.use(config => {
-            config.headers['Authorization'] = ""
-            return config
-        }, error => Promise.reject(error))
-    }
 
     const isEmpty = (obj: Object) => {
         return Object.entries(obj).length === 0;
@@ -72,7 +58,10 @@ const Leftsidebar: React.FC<Props> = ({ onSelectChatbot, onChatbotInterface, onC
 
     return (
         <div className="flex flex-col w-[350px] bg-base-200 p-3 h-full">
-            {
+            <div className="flex justify-center">
+                <img src={LogoImage} className=" max-h-40"/>
+            </div>
+            {/* {
                 me && !isEmpty(me) && 
                 <>
                     <div className="dropdown dropdown-bottom">
@@ -97,7 +86,7 @@ const Leftsidebar: React.FC<Props> = ({ onSelectChatbot, onChatbotInterface, onC
                     </div>
                     <div className="divider my-1" />
                 </>
-            }
+            } */}
             { 
                 me && me.superuser == 1 && 
                 <AddChatBot />
@@ -145,20 +134,6 @@ const Leftsidebar: React.FC<Props> = ({ onSelectChatbot, onChatbotInterface, onC
                     <Link to={"/register"} className="btn btn-neutral">Sign up</Link>
                     <Link to={"/login"} className="btn btn-neutral">Log in</Link>
                 </div>   
-            }
-             { 
-                me && !isEmpty(me) && 
-                <EditProfileModal 
-                    open={showProfileModal}
-                    handleCloseProfileModal={() => setShowProfileModal(false)}
-                />
-            }
-            { 
-                me && !isEmpty(me) && 
-                <ChangePasswordModal 
-                    open={showPasswordModal}
-                    handleClosePasswordModal={() => setShowPasswordModal(false)}
-                />
             }
         </div>
     )
